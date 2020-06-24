@@ -8,13 +8,32 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class TCPServer {
+
+    private final int portNumber;
+    private BufferedReader bufferedReader;
+    private ServerSocket serverSocket;
+    private Socket clientSocket;
+
+    public TCPServer(int portNumber) {
+        this.portNumber = portNumber;
+        bufferedReader = null;
+        serverSocket = null;
+        clientSocket = null;
+    }
+
     public static void main(String[] args) {
 
-        int portNumber = 5000;
-        BufferedReader bufferedReader = null;
-        ServerSocket serverSocket = null;
-        Socket clientSocket = null;
+        TCPServer tcpServer = new TCPServer(5000);
 
+        tcpServer.initSockets();
+
+        tcpServer.readMessage();
+
+        tcpServer.closeConnections();
+
+    }
+
+    public void initSockets() {
         try {
 
             System.out.println("Binding to port " + portNumber + ", please wait  ...");
@@ -24,6 +43,16 @@ public class TCPServer {
             System.out.println("Waiting for a client ...");
             clientSocket = serverSocket.accept();
             System.out.println("Client accepted: " + clientSocket.getLocalAddress() + " : " + clientSocket.getPort());
+
+        } catch (IOException ioException) {
+
+            System.out.println(ioException.getMessage());
+        }
+    }
+
+
+    public void readMessage() {
+        try {
 
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
             bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -35,29 +64,28 @@ public class TCPServer {
                 out.println(thisLine);
             }
 
-
         } catch (IOException ioException) {
 
-            ioException.printStackTrace();
-
-        } finally {
-
-            try {
-
-                if (bufferedReader != null) {
-                    bufferedReader.close();
-                }
-                if (clientSocket != null) {
-                    clientSocket.close();
-                }
-                if (serverSocket != null) {
-                    serverSocket.close();
-                }
-
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
+            System.out.println(ioException.getMessage());
         }
     }
+
+    public void closeConnections() {
+        try {
+            if (bufferedReader != null) {
+                bufferedReader.close();
+            }
+            if (clientSocket != null) {
+                clientSocket.close();
+            }
+            if (serverSocket != null) {
+                serverSocket.close();
+            }
+
+        } catch (IOException ioException) {
+            System.out.println(ioException.getMessage());
+        }
+    }
+
 
 }
